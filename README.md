@@ -13,12 +13,10 @@
 </p>
 
 <p align="center">
+  <a href="https://midad.vercel.app">🌐 Live Demo</a> •
   <a href="#features">Features</a> •
-  <a href="#demo">Demo</a> •
   <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#license">License</a>
+  <a href="#tech-stack">Tech Stack</a>
 </p>
 
 <p align="center">
@@ -41,6 +39,7 @@
 - **Glassmorphism UI**: Modern glass-effect design with smooth transitions
 - **Dark/Light Themes**: Toggle between elegantly crafted themes
 - **Responsive Layout**: Perfect experience on desktop and mobile devices
+- **Smooth Animations**: Fade-in transitions for content loading
 
 ### 📝 **Rich Markdown Rendering**
 - **GitHub Flavored Markdown (GFM)**: Tables, task lists, strikethrough, and more
@@ -48,34 +47,23 @@
 - **Raw HTML Support**: Render embedded HTML within Markdown
 
 ### 📁 **File System Browser**
+- **Demo Mode**: Built-in sample files showcase all features (on Vercel)
 - **Local File Access**: Browse and read Markdown files from your local file system
 - **Folder Navigation**: Navigate through directories with ease
-- **Real-time Updates**: Watch for file changes (when running with server)
 
 ---
 
-## 🖥️ Demo
+## 🚀 Quick Start
 
-<p align="center">
-  <img src="https://via.placeholder.com/800x450?text=Midad+Dark+Mode" alt="Dark Mode Preview" width="45%">
-  <img src="https://via.placeholder.com/800x450?text=Midad+Light+Mode" alt="Light Mode Preview" width="45%">
-</p>
+### Try it Online
 
----
+👉 **[midad.vercel.app](https://midad.vercel.app)** - Live demo with sample files
 
-## 🚀 Installation
-
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-
-### Quick Start
+### Run Locally
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Midad.git
-
-# Navigate to the project
+git clone https://github.com/dzgreeno/Midad.git
 cd Midad
 
 # Install dependencies
@@ -85,34 +73,16 @@ npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+Open `http://localhost:5173` in your browser.
 
 ### With Local File System Access
 
-To browse files from your local file system, start the backend server:
-
 ```bash
-# Run with Express server (for file system access)
+# Run the backend server for file system browsing
 node server.cjs
 ```
 
 Then open `http://localhost:3000`
-
----
-
-## 📖 Usage
-
-### Basic Usage
-1. **Open the App**: Navigate to the application URL
-2. **Set Directory**: Enter a folder path containing Markdown files
-3. **Browse Files**: Select files from the sidebar to view
-4. **Toggle Theme**: Click the moon/sun icon to switch themes
-
-### Keyboard Shortcuts
-| Action | Shortcut |
-|--------|----------|
-| Toggle Theme | Click theme button |
-| Toggle Sidebar | Click menu button (mobile) |
 
 ---
 
@@ -136,29 +106,22 @@ Then open `http://localhost:3000`
 ```
 Midad/
 ├── public/
-│   └── favicon.svg          # App icon
+│   └── favicon.svg
 ├── src/
-│   ├── components/
-│   │   ├── MarkdownViewer.tsx   # Main Markdown renderer
-│   │   ├── Sidebar.tsx          # File navigation sidebar
-│   │   ├── Topbar.tsx           # Top navigation bar
-│   │   └── index.ts             # Component exports
-│   ├── hooks/
-│   │   ├── useMarkdownFiles.ts  # File management hook
-│   │   └── useTheme.ts          # Theme management hook
-│   ├── types/
-│   │   └── index.ts             # TypeScript types
-│   ├── utils/
-│   │   └── detectDirection.ts   # RTL/LTR detection
-│   ├── App.tsx                  # Main application
-│   ├── App.css                  # Application styles
-│   ├── index.css                # Global styles & CSS variables
-│   └── main.tsx                 # Entry point
-├── server.cjs                   # Express server for file access
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+│   ├── components/          # React components
+│   │   ├── MarkdownViewer.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Topbar.tsx
+│   ├── hooks/               # Custom React hooks
+│   │   └── useMarkdownFiles.ts
+│   ├── utils/               # Utility functions
+│   │   ├── detectDirection.ts
+│   │   ├── demoContent.ts   # Demo files for Vercel
+│   │   └── fileLoader.ts
+│   ├── App.tsx
+│   └── App.css
+├── server.cjs               # Express server
+└── package.json
 ```
 
 ---
@@ -167,50 +130,15 @@ Midad/
 
 ### Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/Midad)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dzgreeno/Midad)
 
-1. Click the button above or visit [Vercel](https://vercel.com)
-2. Import your GitHub repository
-3. Deploy with default settings
-
-> **Note**: The Vercel deployment runs the frontend only. For file system access, run the server locally or use a different hosting solution.
-
-### Build for Production
-
-```bash
-# Build the application
-npm run build
-
-# Preview the production build
-npm run preview
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The demo mode automatically activates when the backend is unavailable.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [React Markdown](https://github.com/remarkjs/react-markdown) for Markdown rendering
-- [Prism.js](https://prismjs.com/) for syntax highlighting
-- [Lucide](https://lucide.dev/) for beautiful icons
-- [Google Fonts](https://fonts.google.com/) for Noto Sans Arabic & Inter fonts
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 

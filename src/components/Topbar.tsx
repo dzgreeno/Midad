@@ -56,8 +56,8 @@ export function Topbar({
 
                 <div className="topbar-logo">
                     <FileText color="var(--color-accent)" />
-                    <h1 className="topbar-title">Markdown Reader</h1>
-                    <span className="topbar-subtitle">مستعرض ماركداون</span>
+                    <h1 className="topbar-title">مِداد</h1>
+                    <span className="topbar-subtitle">Midad</span>
                 </div>
             </div>
 
