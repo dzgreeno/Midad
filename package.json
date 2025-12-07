@@ -30,7 +30,8 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "server": "node server.cjs"
+        "server": "node server.cjs",
+        "start": "start.bat"
     },
     "dependencies": {
         "cors": "^2.8.5",

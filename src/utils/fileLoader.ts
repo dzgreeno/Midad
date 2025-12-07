@@ -18,18 +18,31 @@ export interface FilesResponse {
  * Set the base directory to browse
  */
 export async function setBasePath(dirPath: string): Promise<{ success: boolean; path: string }> {
-  const response = await fetch(`${API_BASE}/set-path`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ dirPath }),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/set-path`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dirPath }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to set path');
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('الخادم غير متصل. تأكد من تشغيل: node server.cjs');
+    }
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'فشل في تعيين المسار');
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('الخادم غير متصل. تأكد من تشغيل: node server.cjs');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 /**
