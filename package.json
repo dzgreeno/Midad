@@ -1,12 +1,36 @@
 {
-    "name": "markdown-reader",
+    "name": "midad",
     "private": true,
     "version": "1.0.0",
+    "description": "A modern Markdown reader with excellent Arabic RTL support | قارئ ماركداون عصري مع دعم ممتاز للغة العربية",
     "type": "module",
+    "keywords": [
+        "markdown",
+        "reader",
+        "arabic",
+        "rtl",
+        "react",
+        "typescript",
+        "vite",
+        "markdown-viewer",
+        "gfm",
+        "syntax-highlighting"
+    ],
+    "author": "dzgreeno",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dzgreeno/Midad.git"
+    },
+    "homepage": "https://github.com/dzgreeno/Midad#readme",
+    "bugs": {
+        "url": "https://github.com/dzgreeno/Midad/issues"
+    },
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "server": "node server.cjs"
     },
     "dependencies": {
         "cors": "^2.8.5",
