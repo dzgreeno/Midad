@@ -9,6 +9,7 @@ interface UploadedFile {
 
 interface DropZoneProps {
     onFilesLoaded: (files: UploadedFile[]) => void;
+    onImagesLoaded?: (images: Record<string, string>) => void;
     uploadedFiles: UploadedFile[];
     selectedFilePath: string | null;
     onSelectFile: (file: UploadedFile) => void;
@@ -17,6 +18,7 @@ interface DropZoneProps {
 
 export function DropZone({
     onFilesLoaded,
+    onImagesLoaded,
     uploadedFiles,
     selectedFilePath,
     onSelectFile,
@@ -31,10 +33,11 @@ export function DropZone({
         setIsLoading(true);
         const files = Array.from(fileList);
         const markdownFiles: UploadedFile[] = [];
+        const imageMap: Record<string, string> = {};
 
         for (const file of files) {
-            // Only process .md files
-            if (file.name.toLowerCase().endsWith('.md')) {
+            const fileNameLower = file.name.toLowerCase();
+            if (fileNameLower.endsWith('.md')) {
                 try {
                     const content = await file.text();
                     markdownFiles.push({
@@ -45,14 +48,37 @@ export function DropZone({
                 } catch (err) {
                     console.error(`Failed to read file: ${file.name}`, err);
                 }
+            } else if (
+                fileNameLower.endsWith('.png') ||
+                fileNameLower.endsWith('.jpg') ||
+                fileNameLower.endsWith('.jpeg') ||
+                fileNameLower.endsWith('.gif') ||
+                fileNameLower.endsWith('.svg') ||
+                fileNameLower.endsWith('.webp')
+            ) {
+                try {
+                    const objectUrl = URL.createObjectURL(file);
+                    // Store under the base filename
+                    imageMap[file.name] = objectUrl;
+                    
+                    // Also store under the relative path if available
+                    if (file.webkitRelativePath) {
+                        imageMap[file.webkitRelativePath] = objectUrl;
+                    }
+                } catch (err) {
+                    console.error(`Failed to create Object URL for image: ${file.name}`, err);
+                }
             }
         }
 
         if (markdownFiles.length > 0) {
             onFilesLoaded(markdownFiles);
         }
+        if (Object.keys(imageMap).length > 0 && onImagesLoaded) {
+            onImagesLoaded(imageMap);
+        }
         setIsLoading(false);
-    }, [onFilesLoaded]);
+    }, [onFilesLoaded, onImagesLoaded]);
 
     const handleDragEnter = useCallback((e: DragEvent) => {
         e.preventDefault();
@@ -193,7 +219,7 @@ export function DropZone({
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".md"
+                    accept=".md,image/*"
                     multiple
                     onChange={handleFileSelect}
                     style={{ display: 'none' }}
@@ -239,7 +265,7 @@ export function DropZone({
             <input
                 ref={fileInputRef}
                 type="file"
-                accept=".md"
+                accept=".md,image/*"
                 multiple
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
@@ -247,7 +273,6 @@ export function DropZone({
             <input
                 ref={folderInputRef}
                 type="file"
-                accept=".md"
                 multiple
                 onChange={handleFolderSelect}
                 style={{ display: 'none' }}

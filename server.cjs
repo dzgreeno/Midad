@@ -202,6 +202,21 @@ app.get('/api/current-path', (req, res) => {
     res.json({ path: currentBasePath || null });
 });
 
+// Serve static frontend files from 'dist' directory if it exists
+const distPath = path.join(__dirname, 'dist');
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    console.log(`[Server] Serving static frontend from: ${distPath}`);
+    
+    // Support SPA routing (redirect all non-API requests to index.html)
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
 app.listen(PORT, () => {
     console.log(`📂 File server running on http://localhost:${PORT}`);
     console.log('Ready to browse markdown files!');

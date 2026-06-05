@@ -68,6 +68,8 @@ function App() {
     // State for uploaded files (drag & drop / file picker)
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [selectedUploadedFile, setSelectedUploadedFile] = useState<UploadedFile | null>(null);
+    // State for local uploaded images mapping (filename or path -> Object URL)
+    const [localImages, setLocalImages] = useState<Record<string, string>>({});
 
     // Close outline on small screens by default
     useEffect(() => {
@@ -113,10 +115,20 @@ function App() {
         setSelectedUploadedFile(file);
     }, []);
 
+    const handleImagesLoaded = useCallback((images: Record<string, string>) => {
+        setLocalImages(prev => ({
+            ...prev,
+            ...images
+        }));
+    }, []);
+
     const handleClearFiles = useCallback(() => {
         setUploadedFiles([]);
         setSelectedUploadedFile(null);
-    }, []);
+        // Revoke Object URLs to prevent memory leaks
+        Object.values(localImages).forEach(url => URL.revokeObjectURL(url));
+        setLocalImages({});
+    }, [localImages]);
 
     const handleImageClick = useCallback((url: string, alt: string) => {
         setZoomImage({ url, alt });
@@ -139,8 +151,8 @@ function App() {
     const displayFileName = selectedUploadedFile?.name ?? selectedFile?.name;
     const hasUploadedFiles = uploadedFiles.length > 0;
 
-    // Show DropZone in main content when in demo mode and no uploaded files
-    const showDropZone = isDemoMode && !selectedFile && !hasUploadedFiles;
+    // Show DropZone in main content when no file is selected and we are in demo mode or have no base path set
+    const showDropZone = !selectedFile && !hasUploadedFiles && (isDemoMode || !basePath);
 
     const docDirection = detectDirection(displayContent || '');
 
@@ -182,6 +194,7 @@ function App() {
                         <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
                             <DropZone
                                 onFilesLoaded={handleFilesLoaded}
+                                onImagesLoaded={handleImagesLoaded}
                                 uploadedFiles={uploadedFiles}
                                 selectedFilePath={selectedUploadedFile?.path ?? null}
                                 onSelectFile={handleSelectUploadedFile}
@@ -225,6 +238,7 @@ function App() {
                         {showDropZone ? (
                             <DropZone
                                 onFilesLoaded={handleFilesLoaded}
+                                onImagesLoaded={handleImagesLoaded}
                                 uploadedFiles={[]}
                                 selectedFilePath={null}
                                 onSelectFile={() => { }}
@@ -239,6 +253,7 @@ function App() {
                                 readingSettings={readingSettings}
                                 onImageClick={handleImageClick}
                                 isDemoMode={isDemoMode}
+                                localImages={localImages}
                             />
                         )}
                     </div>

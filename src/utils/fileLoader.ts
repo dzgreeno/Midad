@@ -1,6 +1,7 @@
 import type { MarkdownFile } from '../types';
 
-const API_BASE = 'http://localhost:3001/api';
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE = isLocalhost ? '/api' : 'http://localhost:3001/api';
 
 export interface FileItem {
   name: string;
@@ -55,6 +56,18 @@ export async function getCurrentPath(): Promise<string | null> {
     return data.path;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Check if the backend server is reachable
+ */
+export async function checkBackendConnection(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE}/current-path`);
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 

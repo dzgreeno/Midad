@@ -19,6 +19,7 @@ interface MarkdownViewerProps {
     readingSettings: ReadingSettings;
     onImageClick: (url: string, alt: string) => void;
     isDemoMode: boolean;
+    localImages?: Record<string, string>;
 }
 
 
@@ -29,7 +30,8 @@ export function MarkdownViewer({
     fileName,
     readingSettings,
     onImageClick,
-    isDemoMode
+    isDemoMode,
+    localImages
 }: MarkdownViewerProps) {
     // Detect overall document direction
     const documentDirection = useMemo(() => {
@@ -158,15 +160,38 @@ export function MarkdownViewer({
     // Custom image component with caption and Lightbox click
     const ImageComponent = useMemo(() => {
         return function Image({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: unknown }) {
-            // Rewrite local image paths to serve through /api/media
             let displaySrc = src;
-            if (src && (
-                src.startsWith('file://') ||
-                src.startsWith('/') ||
-                /^[a-zA-Z]:/.test(src) ||
-                (!src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('blob:'))
-            )) {
-                displaySrc = `http://localhost:3001/api/media?path=${encodeURIComponent(src)}`;
+
+            if (src) {
+                // 1. Try to match against local uploaded images first (offline browser mode)
+                if (localImages) {
+                    let filename = '';
+                    try {
+                        const decoded = decodeURIComponent(src);
+                        filename = decoded.split(/[/\\]/).pop() || '';
+                    } catch {
+                        filename = src.split(/[/\\]/).pop() || '';
+                    }
+
+                    // Check if we have a direct filename match or path match
+                    if (localImages[filename]) {
+                        displaySrc = localImages[filename];
+                    } else if (localImages[src]) {
+                        displaySrc = localImages[src];
+                    }
+                }
+
+                // 2. If it's not a local uploaded image, and it's a local filesystem path, rewrite to backend proxy
+                if (displaySrc === src && (
+                    src.startsWith('file://') ||
+                    src.startsWith('/') ||
+                    /^[a-zA-Z]:/.test(src) ||
+                    (!src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('blob:'))
+                )) {
+                    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const apiHost = isLocalhost ? window.location.origin : 'http://localhost:3001';
+                    displaySrc = `${apiHost}/api/media?path=${encodeURIComponent(src)}`;
+                }
             }
 
             return (
@@ -183,7 +208,7 @@ export function MarkdownViewer({
                 </span>
             );
         };
-    }, [onImageClick]);
+    }, [onImageClick, localImages]);
 
     if (loading) {
         return (

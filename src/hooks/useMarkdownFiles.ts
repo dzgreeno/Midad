@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getFileList, loadFileContent, setBasePath, getCurrentPath, toMarkdownFile } from '../utils/fileLoader';
+import { getFileList, loadFileContent, setBasePath, getCurrentPath, toMarkdownFile, checkBackendConnection } from '../utils/fileLoader';
 import { getDemoFileList, getDemoFileContent, demoFiles, toDemoMarkdownFile } from '../utils/demoContent';
 import type { FileItem } from '../utils/fileLoader';
 import type { MarkdownFile, Theme } from '../types';
@@ -70,9 +70,17 @@ export function useMarkdownFiles(): UseMarkdownFilesReturn {
                 const path = await getCurrentPath();
                 if (path) {
                     setBasePathState(path);
+                    setIsDemoMode(false);
                 } else {
-                    // No backend available, switch to demo mode
-                    initDemoMode();
+                    // Backend is running, but no path is configured yet
+                    const isOnline = await checkBackendConnection();
+                    if (isOnline) {
+                        setIsDemoMode(false);
+                        setFiles([]);
+                    } else {
+                        // Backend actually offline, switch to demo mode
+                        initDemoMode();
+                    }
                 }
             } catch {
                 // Backend not available, switch to demo mode
@@ -167,6 +175,7 @@ export function useMarkdownFiles(): UseMarkdownFilesReturn {
             setBasePathState(result.path);
             setSelectedFile(null);
             setContent(null);
+            setIsDemoMode(false); // Disable demo mode since we successfully connected to a local path
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to set directory');
         } finally {
