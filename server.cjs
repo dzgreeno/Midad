@@ -143,6 +143,51 @@ app.get('/api/file', (req, res) => {
 });
 
 /**
+ * GET /api/media
+ * Serves a local media file (image) by streaming it.
+ * Decodes path and checks if it's absolute or relative to base path.
+ */
+app.get('/api/media', (req, res) => {
+    const filePath = req.query.path;
+
+    if (!filePath) {
+        return res.status(400).json({ error: 'File path is required' });
+    }
+
+    try {
+        // Clean prefix "file:///" or "file://"
+        let cleanPath = filePath.replace(/^file:\/\/\/?/, '');
+        cleanPath = decodeURIComponent(cleanPath);
+
+        let resolvedPath;
+        if (path.isAbsolute(cleanPath) || /^[a-zA-Z]:/.test(cleanPath)) {
+            resolvedPath = path.resolve(cleanPath);
+        } else {
+            if (!currentBasePath) {
+                return res.status(400).json({ error: 'No base path set' });
+            }
+            resolvedPath = path.resolve(path.join(currentBasePath, cleanPath));
+        }
+
+        // Check if file exists
+        if (!fs.existsSync(resolvedPath)) {
+            return res.status(404).json({ error: 'File not found: ' + resolvedPath });
+        }
+
+        // Check if it's a directory
+        if (fs.statSync(resolvedPath).isDirectory()) {
+            return res.status(400).json({ error: 'Path is a directory' });
+        }
+
+        // Send the file
+        res.sendFile(resolvedPath);
+    } catch (err) {
+        console.error('Error serving media file:', err);
+        res.status(500).json({ error: 'Failed to serve media file' });
+    }
+});
+
+/**
  * GET /api/current-path
  * Get the current base path
  */

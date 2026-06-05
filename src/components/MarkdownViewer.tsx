@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw';
+import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Loader2, FileQuestion, Clock, FileText } from 'lucide-react';
@@ -154,13 +156,24 @@ export function MarkdownViewer({
     // Custom image component with caption and Lightbox click
     const ImageComponent = useMemo(() => {
         return function Image({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: unknown }) {
+            // Rewrite local image paths to serve through /api/media
+            let displaySrc = src;
+            if (src && (
+                src.startsWith('file://') ||
+                src.startsWith('/') ||
+                /^[a-zA-Z]:/.test(src) ||
+                (!src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('blob:'))
+            )) {
+                displaySrc = `http://localhost:3001/api/media?path=${encodeURIComponent(src)}`;
+            }
+
             return (
                 <span className="reader-image-container">
                     <img
-                        src={src}
+                        src={displaySrc}
                         alt={alt}
                         className="reader-image"
-                        onClick={() => src && onImageClick(src, alt || '')}
+                        onClick={() => displaySrc && onImageClick(displaySrc, alt || '')}
                         title={alt ? 'اضغط لتكبير الصورة' : ''}
                         {...props}
                     />
@@ -225,8 +238,8 @@ export function MarkdownViewer({
 
             <div className="markdown-content">
                 <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeRaw, rehypeKatex]}
                     components={{
                         code: CodeComponent as never,
                         p: ParagraphComponent,
