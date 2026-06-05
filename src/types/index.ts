@@ -16,3 +16,12 @@ export interface AppState {
     sidebarOpen: boolean;
     loading: boolean;
 }
+
+export interface ReadingSettings {
+    fontFamily: 'sans' | 'serif' | 'tajawal' | 'system';
+    fontSize: 'sm' | 'md' | 'lg' | 'xl';
+    lineHeight: 'tight' | 'normal' | 'spacious';
+    pageWidth: 'narrow' | 'normal' | 'wide';
+    layoutStyle: 'scroll' | 'book';
+}
+
