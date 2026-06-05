@@ -190,7 +190,9 @@ export function MarkdownViewer({
                 )) {
                     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                     const apiHost = isLocalhost ? window.location.origin : 'http://127.0.0.1:3001';
-                    displaySrc = `${apiHost}/api/media?path=${encodeURIComponent(src)}`;
+                    // Clean file:// prefix on the client-side to prevent browser security policies from blocking URL parameters containing file://
+                    const cleanSrc = src.replace(/^file:\/\/\/?/, '');
+                    displaySrc = `${apiHost}/api/media?path=${encodeURIComponent(cleanSrc)}`;
                 }
             }
 
