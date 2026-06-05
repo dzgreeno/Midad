@@ -18,6 +18,7 @@ interface MarkdownViewerProps {
     fileName?: string;
     readingSettings: ReadingSettings;
     onImageClick: (url: string, alt: string) => void;
+    isDemoMode: boolean;
 }
 
 
@@ -27,7 +28,8 @@ export function MarkdownViewer({
     theme,
     fileName,
     readingSettings,
-    onImageClick
+    onImageClick,
+    isDemoMode
 }: MarkdownViewerProps) {
     // Detect overall document direction
     const documentDirection = useMemo(() => {
@@ -222,6 +224,12 @@ export function MarkdownViewer({
             dir={documentDirection}
             aria-label={fileName ? `Document: ${fileName}` : 'Markdown document'}
         >
+            {isDemoMode && (
+                <div className="backend-offline-warning" dir="rtl">
+                    <span>⚠️ <strong>تنبيه:</strong> الخادم المحلي غير متصل. لعرض الصور والمعادلات بشكل صحيح، يرجى تشغيل الأداة عبر ملف <code>start.bat</code> أو تشغيل الأمر <code>npm start</code> في سطر الأوامر.</span>
+                </div>
+            )}
+
             {/* Header info / book metrics */}
             {readingStats && (
                 <div className="document-meta-stats" dir="rtl">

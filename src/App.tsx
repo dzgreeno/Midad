@@ -238,6 +238,7 @@ function App() {
                                 fileName={displayFileName}
                                 readingSettings={readingSettings}
                                 onImageClick={handleImageClick}
+                                isDemoMode={isDemoMode}
                             />
                         )}
                     </div>

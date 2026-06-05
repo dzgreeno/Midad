@@ -155,9 +155,13 @@ app.get('/api/media', (req, res) => {
     }
 
     try {
+        console.log(`[Media Proxy] Requested path: ${filePath}`);
         // Clean prefix "file:///" or "file://"
         let cleanPath = filePath.replace(/^file:\/\/\/?/, '');
         cleanPath = decodeURIComponent(cleanPath);
+        
+        // Normalize leading slash on Windows: /d:/web -> d:/web
+        cleanPath = cleanPath.replace(/^\/([a-zA-Z]:)/, '$1');
 
         let resolvedPath;
         if (path.isAbsolute(cleanPath) || /^[a-zA-Z]:/.test(cleanPath)) {
@@ -169,8 +173,11 @@ app.get('/api/media', (req, res) => {
             resolvedPath = path.resolve(path.join(currentBasePath, cleanPath));
         }
 
+        console.log(`[Media Proxy] Resolved path: ${resolvedPath}`);
+        
         // Check if file exists
         if (!fs.existsSync(resolvedPath)) {
+            console.warn(`[Media Proxy] File not found: ${resolvedPath}`);
             return res.status(404).json({ error: 'File not found: ' + resolvedPath });
         }
 
