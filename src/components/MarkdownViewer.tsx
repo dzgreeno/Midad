@@ -189,7 +189,7 @@ export function MarkdownViewer({
                     (!src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('blob:'))
                 )) {
                     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                    const apiHost = isLocalhost ? window.location.origin : 'http://localhost:3001';
+                    const apiHost = isLocalhost ? window.location.origin : 'http://127.0.0.1:3001';
                     displaySrc = `${apiHost}/api/media?path=${encodeURIComponent(src)}`;
                 }
             }

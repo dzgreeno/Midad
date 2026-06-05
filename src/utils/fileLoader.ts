@@ -1,7 +1,7 @@
 import type { MarkdownFile } from '../types';
 
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE = isLocalhost ? '/api' : 'http://localhost:3001/api';
+const API_BASE = isLocalhost ? '/api' : 'http://127.0.0.1:3001/api';
 
 export interface FileItem {
   name: string;
