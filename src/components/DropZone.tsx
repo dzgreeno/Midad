@@ -57,16 +57,23 @@ export function DropZone({
                 fileNameLower.endsWith('.webp')
             ) {
                 try {
-                    const objectUrl = URL.createObjectURL(file);
+                    // Read image as base64 data URI for maximum browser compatibility
+                    const dataUri = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.onerror = () => reject(reader.error);
+                        reader.readAsDataURL(file);
+                    });
+
                     // Store under the base filename
-                    imageMap[file.name] = objectUrl;
+                    imageMap[file.name] = dataUri;
                     
                     // Also store under the relative path if available
                     if (file.webkitRelativePath) {
-                        imageMap[file.webkitRelativePath] = objectUrl;
+                        imageMap[file.webkitRelativePath] = dataUri;
                     }
                 } catch (err) {
-                    console.error(`Failed to create Object URL for image: ${file.name}`, err);
+                    console.error(`Failed to read image: ${file.name}`, err);
                 }
             }
         }

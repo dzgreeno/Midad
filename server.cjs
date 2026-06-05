@@ -105,8 +105,80 @@ app.get('/api/files', (req, res) => {
 });
 
 /**
+ * Resolve a local image path from markdown to an absolute filesystem path.
+ * Handles file:// protocol, URL-encoded characters, Windows drive letters.
+ */
+function resolveImagePath(imgPath, mdFileDir) {
+    let cleanPath = imgPath.replace(/^file:\/\/\/?/, '');
+    try {
+        cleanPath = decodeURIComponent(cleanPath);
+    } catch (e) { /* ignore decode errors */ }
+
+    // Normalize leading slash on Windows: /d:/web -> d:/web
+    cleanPath = cleanPath.replace(/^\/([a-zA-Z]:)/, '$1');
+
+    if (path.isAbsolute(cleanPath) || /^[a-zA-Z]:/.test(cleanPath)) {
+        return path.resolve(cleanPath);
+    }
+
+    // Relative path – resolve from the markdown file's own directory
+    return path.resolve(mdFileDir, cleanPath);
+}
+
+/**
+ * Scan markdown content for image references and embed local ones as
+ * base64 data URIs – exactly the way VS Code / Obsidian handle local images.
+ * This completely bypasses browser security restrictions.
+ */
+function embedLocalImages(markdownContent, mdFileDir) {
+    const MIME_TYPES = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.webp': 'image/webp',
+        '.bmp': 'image/bmp',
+    };
+
+    // Match standard markdown images: ![alt](path)
+    return markdownContent.replace(
+        /!\[([^\]]*)\]\(([^)]+)\)/g,
+        (match, alt, imgPath) => {
+            // Skip images that are already http/https/data/blob URLs
+            if (/^https?:\/\/|^data:|^blob:/.test(imgPath)) {
+                return match;
+            }
+
+            try {
+                const resolved = resolveImagePath(imgPath, mdFileDir);
+                if (!fs.existsSync(resolved) || fs.statSync(resolved).isDirectory()) {
+                    console.warn(`[Image Embed] File not found: ${resolved}`);
+                    return match;
+                }
+
+                const ext = path.extname(resolved).toLowerCase();
+                const mime = MIME_TYPES[ext];
+                if (!mime) {
+                    console.warn(`[Image Embed] Unsupported type: ${ext}`);
+                    return match;
+                }
+
+                const data = fs.readFileSync(resolved);
+                const b64 = data.toString('base64');
+                console.log(`[Image Embed] ✔ ${path.basename(resolved)} (${(data.length / 1024).toFixed(1)} KB)`);
+                return `![${alt}](data:${mime};base64,${b64})`;
+            } catch (e) {
+                console.warn(`[Image Embed] Failed: ${imgPath} – ${e.message}`);
+                return match;
+            }
+        }
+    );
+}
+
+/**
  * GET /api/file
- * Read a specific markdown file
+ * Read a specific markdown file, embedding local images as base64 data URIs.
  */
 app.get('/api/file', (req, res) => {
     const filePath = req.query.path;
@@ -134,7 +206,12 @@ app.get('/api/file', (req, res) => {
     }
 
     try {
-        const content = fs.readFileSync(fullPath, 'utf-8');
+        let content = fs.readFileSync(fullPath, 'utf-8');
+
+        // Embed local images as base64 data URIs
+        console.log(`[Image Embed] Scanning ${path.basename(fullPath)} for local images...`);
+        content = embedLocalImages(content, path.dirname(fullPath));
+
         res.json({ content, path: filePath });
     } catch (err) {
         console.error('Error reading file:', err);
