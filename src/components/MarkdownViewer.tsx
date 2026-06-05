@@ -182,7 +182,8 @@ export function MarkdownViewer({
                 }
 
                 // 2. If it's not a local uploaded image, and it's a local filesystem path, rewrite to backend proxy
-                if (displaySrc === src && (
+                const isRemoteOrData = src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http://') || src.startsWith('https://');
+                if (displaySrc === src && !isRemoteOrData && (
                     src.startsWith('file://') ||
                     src.startsWith('/') ||
                     /^[a-zA-Z]:/.test(src) ||
